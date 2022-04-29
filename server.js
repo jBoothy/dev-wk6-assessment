@@ -5,13 +5,29 @@ const {bots, playerRecord} = require('./data')
 const {shuffleArray} = require('./utils')
 
 app.use(express.json())
+app.use(express.static(`public`))
 
+// include and initialize the rollbar library with your access token
+var Rollbar = require('rollbar')
+var rollbar = new Rollbar({
+  accessToken: 'b3c4ec789a32424db3a0fbdd1d6da839',
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+})
+
+// record a generic message and send it to Rollbar
+rollbar.log('4/29/2022 Assessment')
+
+app.get('/', (req, res)=>{
+    res.sendFile(path.join(__dirname, `/public/index.html`))
+})
 app.get('/api/robots', (req, res) => {
     try {
         res.status(200).send(botsArr)
     } catch (error) {
         console.log('ERROR GETTING BOTS', error)
         res.sendStatus(400)
+        rollbar.warning(`user did not recieve list of bots`)
     }
 })
 
@@ -24,6 +40,7 @@ app.get('/api/robots/five', (req, res) => {
     } catch (error) {
         console.log('ERROR GETTING FIVE BOTS', error)
         res.sendStatus(400)
+        rollbar.warning(`User did not get 5 bots`)
     }
 })
 
@@ -55,6 +72,7 @@ app.post('/api/duel', (req, res) => {
     } catch (error) {
         console.log('ERROR DUELING', error)
         res.sendStatus(400)
+        rollbar.warning(`Dueling error`)
     }
 })
 
@@ -64,6 +82,7 @@ app.get('/api/player', (req, res) => {
     } catch (error) {
         console.log('ERROR GETTING PLAYER STATS', error)
         res.sendStatus(400)
+        rollbar.warning(`Player stats error`)
     }
 })
 
